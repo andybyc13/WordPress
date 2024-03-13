@@ -109,8 +109,9 @@
 }
 
 .screen-reader-text{
-  border:0;
   clip:rect(1px, 1px, 1px, 1px);
+  word-wrap:normal !important;
+  border:0;
   -webkit-clip-path:inset(50%);
   clip-path:inset(50%);
   height:1px;
@@ -119,12 +120,11 @@
   padding:0;
   position:absolute;
   width:1px;
-  word-wrap:normal !important;
 }
 
 .screen-reader-text:focus{
-  background-color:#ddd;
   clip:auto !important;
+  background-color:#ddd;
   -webkit-clip-path:none;
           clip-path:none;
   color:#444;

@@ -101,15 +101,13 @@ final class WP_Block_Patterns_Registry {
 			return false;
 		}
 
-		if ( ! isset( $pattern_properties['file_path'] ) ) {
-			if ( ! isset( $pattern_properties['content'] ) || ! is_string( $pattern_properties['content'] ) ) {
-				_doing_it_wrong(
-					__METHOD__,
-					__( 'Pattern content must be a string.' ),
-					'5.5.0'
-				);
-				return false;
-			}
+		if ( ! isset( $pattern_properties['content'] ) || ! is_string( $pattern_properties['content'] ) ) {
+			_doing_it_wrong(
+				__METHOD__,
+				__( 'Pattern content must be a string.' ),
+				'5.5.0'
+			);
+			return false;
 		}
 
 		$pattern = array_merge(
@@ -180,30 +178,6 @@ final class WP_Block_Patterns_Registry {
 	}
 
 	/**
-	 * Retrieves the content of a registered block pattern.
-	 *
-	 * @since 6.5.0
-	 *
-	 * @param string $pattern_name      Block pattern name including namespace.
-	 * @param bool   $outside_init_only Optional. Return only patterns registered outside the `init` action. Default false.
-	 * @return string The content of the block pattern.
-	 */
-	private function get_content( $pattern_name, $outside_init_only = false ) {
-		if ( $outside_init_only ) {
-			$patterns = &$this->registered_patterns_outside_init;
-		} else {
-			$patterns = &$this->registered_patterns;
-		}
-		if ( ! isset( $patterns[ $pattern_name ]['content'] ) && isset( $patterns[ $pattern_name ]['file_path'] ) ) {
-			ob_start();
-			include $patterns[ $pattern_name ]['file_path'];
-			$patterns[ $pattern_name ]['content'] = ob_get_clean();
-			unset( $patterns[ $pattern_name ]['file_path'] );
-		}
-		return $patterns[ $pattern_name ]['content'];
-	}
-
-	/**
 	 * Retrieves an array containing the properties of a registered block pattern.
 	 *
 	 * @since 5.5.0
@@ -217,7 +191,6 @@ final class WP_Block_Patterns_Registry {
 		}
 
 		$pattern            = $this->registered_patterns[ $pattern_name ];
-		$pattern['content'] = $this->get_content( $pattern_name );
 		$pattern['content'] = $this->prepare_content( $pattern, get_hooked_blocks() );
 
 		return $pattern;
@@ -233,17 +206,16 @@ final class WP_Block_Patterns_Registry {
 	 *                 and per style.
 	 */
 	public function get_all_registered( $outside_init_only = false ) {
-		$patterns      = $outside_init_only
+		$patterns      = array_values(
+			$outside_init_only
 				? $this->registered_patterns_outside_init
-				: $this->registered_patterns;
+				: $this->registered_patterns
+		);
 		$hooked_blocks = get_hooked_blocks();
-
 		foreach ( $patterns as $index => $pattern ) {
-			$pattern['content']            = $this->get_content( $pattern['name'], $outside_init_only );
 			$patterns[ $index ]['content'] = $this->prepare_content( $pattern, $hooked_blocks );
 		}
-
-		return array_values( $patterns );
+		return $patterns;
 	}
 
 	/**
